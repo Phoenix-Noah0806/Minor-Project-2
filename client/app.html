@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Whisper | Safe Space</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h1>🎓 Campus Whisper</h1>
+                <span class="tagline">Safe Space</span>
+            </div>
+            <nav class="nav">
+                <a href="#feed" class="nav-link active" onclick="event.preventDefault(); showFeed();">Campus Feed</a>
+                <a href="#history" class="nav-link" onclick="event.preventDefault(); showHistory();">My History</a>
+                <a href="#write" class="nav-link write-btn">Write Secret</a>
+            </nav>
+            <div class="auth-actions">
+                <div id="authLoggedOut" class="auth-buttons">
+                    <a href="index.html" class="auth-btn auth-btn-ghost" aria-label="Log in">Log in</a>
+                    <a href="index.html" class="auth-btn auth-btn-primary" aria-label="Sign up">Sign up</a>
+                </div>
+                <div id="authLoggedIn" class="auth-buttons" style="display: none;">
+                    <a href="index.html" class="auth-btn auth-btn-logout" aria-label="Log out" onclick="event.preventDefault(); logOut();">Log out</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="welcome-card">
+                <h2>Welcome back, friend.</h2>
+            </div>
+
+            <!-- Trending Section -->
+            <div class="trending-section">
+                <h3>🔥 Trending on Campus</h3>
+                <div class="trending-item">
+                    <span class="trending-icon">🎓</span>
+                    <div class="trending-content">
+                        <span class="trending-title">Study Stress</span>
+                        <span class="trending-time">2m ago</span>
+                    </div>
+                </div>
+                <div class="trending-item">
+                    <span class="trending-icon">❤️</span>
+                    <div class="trending-content">
+                        <span class="trending-title">Crush</span>
+                        <span class="trending-time">15m ago</span>
+                    </div>
+                </div>
+                <div class="trending-item">
+                    <span class="trending-icon">🤣</span>
+                    <div class="trending-content">
+                        <span class="trending-title">Funny</span>
+                        <span class="trending-time">1h ago</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Safe Space Rules -->
+            <div class="rules-section">
+                <h3>Safe Space Rules</h3>
+                <ul class="rules-list">
+                    <li>✓ Be Kind & Support</li>
+                    <li>✓ No Names (Anonymity First)</li>
+                    <li>✓ No Bullying</li>
+                </ul>
+            </div>
+
+            <!-- Hot Topics -->
+            <div class="topics-section">
+                <h3>Hot Topics</h3>
+                <div class="topics-grid">
+                    <span class="topic-tag">#finals_week</span>
+                    <span class="topic-tag">#library_crush</span>
+                    <span class="topic-tag">#lost_airpods</span>
+                </div>
+            </div>
+
+            <!-- Campus Mood -->
+            <div class="mood-section">
+                <h3>Campus Mood</h3>
+                <div class="mood-bar">
+                    <div class="mood-item">
+                        <span>Stressed</span>
+                        <div class="mood-progress">
+                            <div class="mood-fill stressed" style="width: 60%"></div>
+                        </div>
+                        <span class="mood-percent">60%</span>
+                    </div>
+                    <div class="mood-item">
+                        <span>Happy</span>
+                        <div class="mood-progress">
+                            <div class="mood-fill happy" style="width: 25%"></div>
+                        </div>
+                        <span class="mood-percent">25%</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Feed -->
+        <main class="feed-container">
+            <div class="feed-header">
+                <h2>Campus Feed</h2>
+                <div class="filter-buttons">
+                    <button class="filter-btn active">All</button>
+                    <button class="filter-btn">❤️ Crush</button>
+                    <button class="filter-btn">📚 Study</button>
+                    <button class="filter-btn">🤣 Funny</button>
+                    <button class="filter-btn">😶 Secret</button>
+                </div>
+            </div>
+
+            <!-- Confession Cards -->
+            <div class="confessions-grid">
+                <article class="confession-card" data-confession-id="8F3">
+                    <div class="card-header">
+                        <span class="confession-id">Anon #8F3</span>
+                        <span class="confession-time">2m ago</span>
+                    </div>
+                    <div class="confession-category">🎓 Study Stress</div>
+                    <p class="confession-text">I have my finals tomorrow and I haven't started studying. I'm just sitting here eating cereal and watching the ceiling fans spin.</p>
+                    <div class="card-footer">
+                        <button class="action-btn like-btn" data-confession-id="8F3">
+                            <span class="btn-icon">👍</span>
+                            <span class="btn-count">243</span>
+                        </button>
+                        <button class="action-btn love-btn" data-confession-id="8F3">
+                            <span class="btn-icon">❤️</span>
+                            <span class="btn-count">156</span>
+                        </button>
+                        <button class="action-btn laugh-btn" data-confession-id="8F3">
+                            <span class="btn-icon">😂</span>
+                            <span class="btn-count">89</span>
+                        </button>
+                        <div class="card-actions" id="actions-8F3" style="display: none;">
+                            <button class="edit-btn" onclick="openEditModal('8F3')" title="Edit">✏️</button>
+                            <button class="delete-btn" onclick="openDeleteModal('8F3')" title="Delete">🗑️</button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- <article class="confession-card" data-confession-id="X92">
+                    <div class="card-header">
+                        <span class="confession-id">Anon #X92</span>
+                        <span class="confession-time">15m ago</span>
+                    </div>
+                    <div class="confession-category">❤️ Crush</div>
+                    <p class="confession-text">To the guy in the blue hoodie at the library: I dropped my pen on purpose just so you'd look at me. It worked, but then I tripped. 😳</p>
+                    <div class="card-footer">
+                        <button class="action-btn like-btn" data-confession-id="X92">
+                            <span class="btn-icon">👍</span>
+                            <span class="btn-count">892</span>
+                        </button>
+                        <button class="action-btn love-btn" data-confession-id="X92">
+                            <span class="btn-icon">❤️</span>
+                            <span class="btn-count">456</span>
+                        </button>
+                        <button class="action-btn laugh-btn" data-confession-id="X92">
+                            <span class="btn-icon">😂</span>
+                            <span class="btn-count">234</span>
+                        </button>
+                        <div class="card-actions" id="actions-X92" style="display: none;">
+                            <button class="edit-btn" onclick="openEditModal('X92')" title="Edit">✏️</button>
+                            <button class="delete-btn" onclick="openDeleteModal('X92')" title="Delete">🗑️</button>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="confession-card" data-confession-id="DB4">
+                    <div class="card-header">
+                        <span class="confession-id">Anon #DB4</span>
+                        <span class="confession-time">1h ago</span>
+                    </div>
+                    <div class="confession-category">🤣 Funny</div>
+                    <p class="confession-text">I accidentally called my professor "mom" during the presentation. She answered "Yes honey?". I'm transferring schools.</p>
+                    <div class="card-footer">
+                        <button class="action-btn like-btn" data-confession-id="DB4">
+                            <span class="btn-icon">👍</span>
+                            <span class="btn-count">1.2k</span>
+                        </button>
+                        <button class="action-btn love-btn" data-confession-id="DB4">
+                            <span class="btn-icon">❤️</span>
+                            <span class="btn-count">567</span>
+                        </button>
+                        <button class="action-btn laugh-btn" data-confession-id="DB4">
+                            <span class="btn-icon">😂</span>
+                            <span class="btn-count">890</span>
+                        </button>
+                        <div class="card-actions" id="actions-DB4" style="display: none;">
+                            <button class="edit-btn" onclick="openEditModal('DB4')" title="Edit">✏️</button>
+                            <button class="delete-btn" onclick="openDeleteModal('DB4')" title="Delete">🗑️</button>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="confession-card" data-confession-id="A7X">
+                    <div class="card-header">
+                        <span class="confession-id">Anon #A7X</span>
+                        <span class="confession-time">2h ago</span>
+                    </div>
+                    <div class="confession-category">📚 Study</div>
+                    <p class="confession-text">I just realized I've been studying for the wrong exam for 3 days straight. I was so confident. I made flashcards. I highlighted everything. Then I checked the syllabus and it's for next week's module. Send ice cream. 🍦</p>
+                    <div class="card-tags">
+                        <span class="tag">#study_fail</span>
+                        <span class="tag">#panic</span>
+                    </div>
+                    <div class="card-footer">
+                        <button class="action-btn like-btn" data-confession-id="A7X">
+                            <span class="btn-icon">👍</span>
+                            <span class="btn-count">243</span>
+                        </button>
+                        <button class="action-btn love-btn" data-confession-id="A7X">
+                            <span class="btn-icon">❤️</span>
+                            <span class="btn-count">155</span>
+                        </button>
+                        <button class="action-btn laugh-btn" data-confession-id="A7X">
+                            <span class="btn-icon">😂</span>
+                            <span class="btn-count">88</span>
+                        </button>
+                        <div class="card-actions" id="actions-A7X">
+                            <button class="edit-btn" onclick="openEditModal('A7X')" title="Edit">✏️</button>
+                            <button class="delete-btn" onclick="openDeleteModal('A7X')" title="Delete">🗑️</button>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="confession-card" data-confession-id="B22">
+                    <div class="card-header">
+                        <span class="confession-id">Anon #B22</span>
+                        <span class="confession-time">3h ago</span>
+                    </div>
+                    <div class="confession-category">😶 Secret</div>
+                    <p class="confession-text">I think I failed Calculus but I'm too scared to check my grades. Every time I open the portal, I close it immediately. The anxiety is real.</p>
+                    <div class="card-footer">
+                        <button class="action-btn like-btn" data-confession-id="B22">
+                            <span class="btn-icon">👍</span>
+                            <span class="btn-count">124</span>
+                        </button>
+                        <button class="action-btn love-btn" data-confession-id="B22">
+                            <span class="btn-icon">❤️</span>
+                            <span class="btn-count">78</span>
+                        </button>
+                        <button class="action-btn laugh-btn" data-confession-id="B22">
+                            <span class="btn-icon">😂</span>
+                            <span class="btn-count">45</span>
+                        </button>
+                        <div class="card-actions" id="actions-B22">
+                            <button class="edit-btn" onclick="openEditModal('B22')" title="Edit">✏️</button>
+                            <button class="delete-btn" onclick="openDeleteModal('B22')" title="Delete">🗑️</button>
+                        </div>
+                    </div>
+                </article> -->
+            </div>
+        </main>
+
+        <!-- Right Sidebar - Personal Space -->
+        <aside class="personal-sidebar">
+            <div class="personal-header">
+                <h3>My Personal Space</h3>
+                <div class="user-profile">
+                    <span class="profile-id">Student #294</span>
+                    <span class="profile-faculty">Faculty of Science</span>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <div class="stat-item">
+                    <span class="stat-number">12</span>
+                    <span class="stat-label">Secrets</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">852</span>
+                    <span class="stat-label">Hearts</span>
+                </div>
+            </div>
+
+
+            <div class="campus-stats">
+                <h4>Campus Trends</h4>
+                <div class="stat-row">
+                    <span>Most Active Hours</span>
+                    <span>8-10 PM</span>
+                </div>
+                <div class="stat-row">
+                    <span>Weekly Mood Cloud</span>
+                    <span>Stressed</span>
+                </div>
+                <div class="stat-row">
+                    <span>Total Confessions</span>
+                    <span>14,204</span>
+                </div>
+                <div class="stat-row">
+                    <span>Support Given</span>
+                    <span>85.4k</span>
+                </div>
+                <div class="stat-row">
+                    <span>Campuses Online</span>
+                    <span>12</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Write Secret Modal -->
+    <div class="modal-overlay" id="writeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Share a Secret</h2>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-subtitle">What's on your mind?</p>
+                <textarea id="confessionText" class="confession-input" placeholder="Type your confession here... Remember, you're anonymous and safe here." rows="8"></textarea>
+                <div class="vibe-selector">
+                    <p>Choose a Vibe:</p>
+                    <div class="vibe-buttons">
+                        <button class="vibe-btn" data-vibe="crush">❤️ Crush</button>
+                        <button class="vibe-btn" data-vibe="study">📚 Study</button>
+                        <button class="vibe-btn" data-vibe="funny">🤣 Funny</button>
+                        <button class="vibe-btn" data-vibe="secret">😶 Secret</button>
+                    </div>
+                </div>
+                <div class="tag-input-section">
+                    <p>Add Tags (optional):</p>
+                    <input type="text" id="confessionTags" class="tag-input" placeholder="#your_tag">
+                </div>
+                <div class="secret-code-section">
+                    <p>Enter Secret Code <span class="required">*</span></p>
+                    <p class="secret-hint">Create a secret code to edit or delete this confession later. Keep it safe!</p>
+                    <input type="password" id="secretCode" class="secret-code-input" placeholder="Enter your secret code" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+                <button class="post-btn" onclick="postConfession()">Anonymous Post Secret</button>
+            </div>
+            <div class="modal-note">
+                <p>By posting, you agree to being kind. 100% Anonymous • Free To Use</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Confession Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Confession</h2>
+                <button class="close-btn" onclick="closeEditModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="secret-code-section">
+                    <p>Enter Secret Code <span class="required">*</span></p>
+                    <input type="password" id="editSecretCode" class="secret-code-input" placeholder="Enter secret code to edit" required>
+                    <p class="error-message" id="editError" style="display: none; color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem;"></p>
+                </div>
+                <p class="modal-subtitle">Edit your confession:</p>
+                <textarea id="editConfessionText" class="confession-input" rows="8"></textarea>
+                <div class="vibe-selector">
+                    <p>Choose a Vibe:</p>
+                    <div class="vibe-buttons">
+                        <button class="vibe-btn edit-vibe-btn" data-vibe="crush">❤️ Crush</button>
+                        <button class="vibe-btn edit-vibe-btn" data-vibe="study">📚 Study</button>
+                        <button class="vibe-btn edit-vibe-btn" data-vibe="funny">🤣 Funny</button>
+                        <button class="vibe-btn edit-vibe-btn" data-vibe="secret">😶 Secret</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="closeEditModal()">Cancel</button>
+                <button class="post-btn" onclick="saveEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- My History Modal -->
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal-content history-content">
+            <div class="modal-header">
+                <h2>My History</h2>
+                <button class="close-btn" onclick="closeHistoryModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="history-tabs">
+                    <button class="history-tab active" onclick="showHistoryTab('posts', this)">My Posts</button>
+                    <button class="history-tab" onclick="showHistoryTab('drafts', this)">Drafts <span class="tab-count">(3)</span></button>
+                    <button class="history-tab" onclick="showHistoryTab('saved', this)">Saved</button>
+                </div>
+
+                <!-- My Posts Tab -->
+                <div id="historyPosts" class="history-tab-content active">
+                    <div class="history-posts-list">
+                        <div class="history-post-item">
+                            <p class="post-preview">I think I failed Calculus but I'm too scared to check...</p>
+                            <div class="post-meta">
+                                <span>2 days ago</span>
+                                <span>•</span>
+                                <span>124 Views</span>
+                                <span>•</span>
+                                <span class="post-id">#B22</span>
+                            </div>
+                            <div class="history-post-actions">
+                                <button class="history-action-btn" onclick="viewPost('B22')">View</button>
+                                <button class="history-action-btn" onclick="openEditModal('B22')">Edit</button>
+                                <button class="history-action-btn delete" onclick="openDeleteModal('B22')">Delete</button>
+                            </div>
+                        </div>
+                        <div class="history-post-item">
+                            <p class="post-preview">Buying a coffee every day is ruining my budget...</p>
+                            <div class="post-meta">
+                                <span>1 week ago</span>
+                                <span>•</span>
+                                <span>89 Views</span>
+                                <span>•</span>
+                                <span class="post-id">#A7X</span>
+                            </div>
+                            <div class="history-post-actions">
+                                <button class="history-action-btn" onclick="viewPost('A7X')">View</button>
+                                <button class="history-action-btn" onclick="openEditModal('A7X')">Edit</button>
+                                <button class="history-action-btn delete" onclick="openDeleteModal('A7X')">Delete</button>
+                            </div>
+                        </div>
+                        <div class="empty-state" id="emptyPosts" style="display: none;">
+                            <p>No posts yet. Start sharing your confessions!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Drafts Tab -->
+                <div id="historyDrafts" class="history-tab-content">
+                    <div class="history-posts-list">
+                        <div class="history-post-item draft">
+                            <p class="post-preview">I have something to say but I'm not sure if I should post it...</p>
+                            <div class="post-meta">
+                                <span>Saved as draft</span>
+                                <span>•</span>
+                                <span>Yesterday</span>
+                            </div>
+                            <div class="history-post-actions">
+                                <button class="history-action-btn" onclick="continueDraft(1)">Continue</button>
+                                <button class="history-action-btn delete" onclick="deleteDraft(1)">Delete</button>
+                            </div>
+                        </div>
+                        <div class="history-post-item draft">
+                            <p class="post-preview">This is my second draft...</p>
+                            <div class="post-meta">
+                                <span>Saved as draft</span>
+                                <span>•</span>
+                                <span>3 days ago</span>
+                            </div>
+                            <div class="history-post-actions">
+                                <button class="history-action-btn" onclick="continueDraft(2)">Continue</button>
+                                <button class="history-action-btn delete" onclick="deleteDraft(2)">Delete</button>
+                            </div>
+                        </div>
+                        <div class="history-post-item draft">
+                            <p class="post-preview">Another draft waiting to be published...</p>
+                            <div class="post-meta">
+                                <span>Saved as draft</span>
+                                <span>•</span>
+                                <span>1 week ago</span>
+                            </div>
+                            <div class="history-post-actions">
+                                <button class="history-action-btn" onclick="continueDraft(3)">Continue</button>
+                                <button class="history-action-btn delete" onclick="deleteDraft(3)">Delete</button>
+                            </div>
+                        </div>
+                        <div class="empty-state" id="emptyDrafts" style="display: none;">
+                            <p>No drafts saved.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Saved Tab -->
+                <div id="historySaved" class="history-tab-content">
+                    <div class="history-posts-list">
+                        <div class="history-post-item saved">
+                            <p class="post-preview">To the guy in the blue hoodie at the library: I dropped my pen...</p>
+                            <div class="post-meta">
+                                <span>Saved</span>
+                                <span>•</span>
+                                <span>2 days ago</span>
+                                <span>•</span>
+                                <span class="post-id">#X92</span>
+                            </div>
+                            <div class="history-post-actions">
+                                <button class="history-action-btn" onclick="viewPost('X92')">View</button>
+                                <button class="history-action-btn delete" onclick="unsavePost('X92')">Unsave</button>
+                            </div>
+                        </div>
+                        <div class="empty-state" id="emptySaved" style="display: none;">
+                            <p>No saved posts yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confession Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Delete Confession</h2>
+                <button class="close-btn" onclick="closeDeleteModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-subtitle">Are you sure you want to delete this confession? This action cannot be undone.</p>
+                <div class="secret-code-section">
+                    <p>Enter Secret Code <span class="required">*</span></p>
+                    <input type="password" id="deleteSecretCode" class="secret-code-input" placeholder="Enter secret code to delete" required>
+                    <p class="error-message" id="deleteError" style="display: none; color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem;"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="closeDeleteModal()">Cancel</button>
+                <button class="delete-confirm-btn" onclick="confirmDelete()">Delete Confession</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
