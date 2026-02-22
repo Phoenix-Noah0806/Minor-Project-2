@@ -22,12 +22,13 @@ async function checkUser(){
     "Welcome, " + user.displayName;
 }
 
+
 async function logOut() {
-  await fetch("http://localhost:5000/auth/logout", {
+  await fetch("http://localhost:3000/auth/logout", {
     credentials: "include"
   });
 
-  window.location.href = "index.html";
+  window.location.href = "/index.html";
 }
 
 checkUser();
