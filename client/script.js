@@ -1,5 +1,5 @@
 let currentUser = null;
-
+let currentEditId = null;
 async function checkUser() {
   const res = await fetch("http://localhost:3000/auth/user", {
     credentials: "include",
@@ -31,6 +31,7 @@ async function logOut() {
 async function loadConfessions() {
   const res = await fetch("http://localhost:3000/confessions");
   const data = await res.json();
+
   const container = document.getElementById("confessionContainer");
   container.innerHTML = "";
 
@@ -38,14 +39,28 @@ async function loadConfessions() {
     const card = document.createElement("div");
     card.className = "confession-card";
 
-    card.innerHTML = `
-      <div class="card-header">
-        <span class="confession-id">${c.anonId}</span>
-        <span>${new Date(c.createdAt).toLocaleString()}</span>
-      </div>
+    card.setAttribute("data-confession-id", c._id);
 
-      <div class="confession-category">${c.vibe}</div>
-      <p class="confession-text">${c.text}</p>
+    const isOwner = currentUser && currentUser.id === c.userID; // ⭐ add this
+
+    card.innerHTML = `
+       <div class="card-header">
+    <span class="confession-id">${c.anonId}</span>
+    <span>${new Date(c.createdAt).toLocaleString()}</span>
+  </div>
+
+  <div class="confession-category">${c.vibe}</div>
+  <p class="confession-text">${c.text}</p>
+
+  ${
+    c.tags && c.tags.length
+      ? `<div class="card-tags">
+          ${c.tags.map((tag) => `<span class="tag">#${tag}</span>`).join("")}
+        </div>`
+      : ""
+  }
+
+  
     `;
 
     container.appendChild(card);
@@ -70,6 +85,8 @@ async function postConfession() {
   const text = document.getElementById("confessionText").value.trim();
   const vibe = document.querySelector(".vibe-btn.active")?.dataset.vibe || "";
   const secretCode = document.getElementById("secretCode").value.trim();
+  const tagsRaw = document.getElementById("confessionTags").value.trim();
+  const tags = tagsRaw ? tagsRaw.split(",").map((t) => t.trim()) : [];
   if (!text || !vibe || !secretCode) {
     return alert("All fields are required");
   }
@@ -77,15 +94,53 @@ async function postConfession() {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ text, vibe, secretCode }),
+    body: JSON.stringify({ text, vibe, secretCode, tags }),
   });
   closeModal();
   loadConfessions();
 }
 
+async function loadMyPosts() {
+  const res = await fetch("http://localhost:3000/confessions/my", {
+    credentials: "include",
+  });
+
+  const data = await res.json();
+
+  const container = document.getElementById("myPostsContainer");
+  container.innerHTML = "";
+
+  data.forEach((c) => {
+    const div = document.createElement("div");
+    div.className = "history-post-item";
+
+    div.innerHTML = `
+       <p class="post-preview">${c.text}</p>
+  <div class="post-meta">
+    <span>${new Date(c.createdAt).toLocaleString()}</span>
+  </div>
+
+  <div class="history-post-actions">
+    <button class="history-action-btn" onclick="viewPost('${c._id}')">View</button>
+    <button class="history-action-btn" onclick="openEditModal('${c._id}')">Edit</button>
+    <button class="history-action-btn delete" onclick="openDeleteModal('${c._id}')">Delete</button>
+  </div>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+function showHistory() {
+  document.querySelector('.nav-link[href="#feed"]').classList.remove("active");
+  document.querySelector('.nav-link[href="#history"]').classList.add("active");
+
+  document.getElementById("historyModal").style.display = "flex";
+
+  loadMyPosts();
+}
 function openEditModal(confessionId) {
   // Only allow editing user's own confessions
-  
 
   currentEditId = confessionId;
   const card = document.querySelector(`[data-confession-id="${confessionId}"]`);
@@ -99,13 +154,13 @@ function openEditModal(confessionId) {
   // Set vibe based on category
   document.querySelectorAll(".edit-vibe-btn").forEach((btn) => {
     btn.classList.remove("active");
-    if (category.includes("Crush") && btn.dataset.vibe === "crush")
+    if (category === "crush" && btn.dataset.vibe === "crush")
       btn.classList.add("active");
-    if (category.includes("Study") && btn.dataset.vibe === "study")
+    if (category === "study" && btn.dataset.vibe === "study")
       btn.classList.add("active");
-    if (category.includes("Funny") && btn.dataset.vibe === "funny")
+    if (category === "funny" && btn.dataset.vibe === "funny")
       btn.classList.add("active");
-    if (category.includes("Secret") && btn.dataset.vibe === "secret")
+    if (category === "secret" && btn.dataset.vibe === "secret")
       btn.classList.add("active");
   });
 
@@ -117,55 +172,44 @@ function closeEditModal() {
   currentEditId = null;
 }
 
-function saveEdit() {
+async function saveEdit() {
   const secretCode = document.getElementById("editSecretCode").value.trim();
   const newText = document.getElementById("editConfessionText").value.trim();
+  const vibe = document.querySelector(".edit-vibe-btn.active")?.dataset.vibe;
 
-  if (!secretCode) {
-    document.getElementById("editError").textContent =
-      "Please enter secret code.";
+  if (!secretCode || !newText) {
+    document.getElementById("editError").textContent = "All fields required";
     document.getElementById("editError").style.display = "block";
     return;
   }
 
-  // Verify secret code (in real app, check with backend)
- 
-
-  if (!newText) {
-    document.getElementById("editError").textContent =
-      "Please enter confession text.";
-    document.getElementById("editError").style.display = "block";
-    return;
-  }
-
-  // Update confession (in real app, send to backend)
-  const card = document.querySelector(
-    `[data-confession-id="${currentEditId}"]`,
+  const res = await fetch(
+    `http://localhost:3000/confessions/${currentEditId}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ text: newText, vibe, secretCode }),
+    },
   );
-  card.querySelector(".confession-text").textContent = newText;
 
-  const selectedVibe = document.querySelector(".edit-vibe-btn.active");
-  if (selectedVibe) {
-    const vibeMap = {
-      crush: "❤️ Crush",
-      study: "📚 Study",
-      funny: "🤣 Funny",
-      secret: "😶 Secret",
-    };
-    card.querySelector(".confession-category").textContent =
-      vibeMap[selectedVibe.dataset.vibe];
+  const data = await res.json();
+
+  if (!res.ok) {
+    document.getElementById("editError").textContent = data.message;
+    document.getElementById("editError").style.display = "block";
+    return;
   }
 
-  alert("Confession updated successfully!");
   closeEditModal();
+  loadConfessions();
 }
 
-function openDeleteModal(confessionId) {
-  currentDeleteId = id;
-  document.getElementById("deleteModal").style.display = "flex";
-  }
+let currentDeleteId = null;
 
-  currentDeleteId = confessionId;
+function openDeleteModal(id) {
+  currentDeleteId = id;
+
   document.getElementById("deleteSecretCode").value = "";
   document.getElementById("deleteError").style.display = "none";
   document.getElementById("deleteModal").style.display = "flex";
@@ -186,12 +230,15 @@ async function confirmDelete() {
     return;
   }
 
-  const res = await fetch(`http://localhost:3000/confessions/${currentDeleteId}`, {
-    method: "DELETE",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ secretCode })
-  });
+  const res = await fetch(
+    `http://localhost:3000/confessions/${currentDeleteId}`,
+    {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ secretCode }),
+    },
+  );
 
   const data = await res.json();
 
@@ -204,24 +251,6 @@ async function confirmDelete() {
   closeDeleteModal();
   loadConfessions();
 }
-
-  // Verify secret code (in real app, check with backend)
-  if (confessionSecrets[currentDeleteId] !== secretCode) {
-    document.getElementById("deleteError").textContent =
-      "Incorrect secret code.";
-    document.getElementById("deleteError").style.display = "block";
-    return;
-  }
-
-  // Delete confession (in real app, send to backend)
-  const card = document.querySelector(
-    `[data-confession-id="${currentDeleteId}"]`,
-  );
-  card.remove();
-
-  alert("Confession deleted successfully!");
-  closeDeleteModal();
-
 
 // Filter buttons
 document.querySelectorAll(".filter-btn").forEach((btn) => {
@@ -272,12 +301,6 @@ function showFeed() {
     .classList.remove("active");
   document.querySelector(".main-container").style.display = "grid";
   closeHistoryModal();
-}
-
-function showHistory() {
-  document.querySelector('.nav-link[href="#feed"]').classList.remove("active");
-  document.querySelector('.nav-link[href="#history"]').classList.add("active");
-  document.getElementById("historyModal").style.display = "flex";
 }
 
 function closeHistoryModal() {
@@ -338,7 +361,6 @@ function unsavePost(confessionId) {
   }
 }
 
-
 // Close modal on overlay click
 document.getElementById("writeModal").addEventListener("click", function (e) {
   if (e.target === this) {
@@ -364,5 +386,7 @@ document.getElementById("historyModal").addEventListener("click", function (e) {
     showFeed();
   }
 });
-checkUser();
-loadConfessions();
+(async () => {
+  await checkUser();
+  loadConfessions();
+})();

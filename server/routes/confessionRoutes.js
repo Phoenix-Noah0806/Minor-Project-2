@@ -9,12 +9,13 @@ router.post('/',async(req ,res)=>{
   if(!req.user){
     return res.status(401).json({message:"Log In Required!!!"})
   }
-  const{text,vibe,secretCode}=req.body
+  const{text,vibe,secretCode,tags}=req.body
   const anonId="Anon" + Math.floor(10000+Math.random()*90000)
   const confession=await Confession.create({
     anonId,
     text,
     vibe,
+    tags:tags || [],
     secretCode,
     userID:req.user.id
   })
@@ -25,7 +26,16 @@ router.get('/',async (req ,res)=>{
   const data=await Confession.find().sort({ createdAt: -1 })
   res.json(data)
 })
+router.get("/my", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Login required" });
+  }
 
+  const posts = await Confession.find({ userID: req.user.id })
+    .sort({ createdAt: -1 });
+
+  res.json(posts);
+});
 router.put("/:id", async (req, res) => {
   const { secretCode, text } = req.body;
 
@@ -55,4 +65,6 @@ router.delete("/:id", async (req, res) => {
 
   res.json({ message: "Deleted" });
 });
+
+
 export default router;
