@@ -6,9 +6,12 @@ import passport from "./config/passport.js";
 import authRoutes from "./routes/authRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import connectDB from "./config/db.js";
+import confessionRoutes from './routes/confessionRoutes.js'
 dotenv.config();
 
 const app = express();
+connectDB()
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -31,6 +34,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/auth", authRoutes);
+app.use("/confessions", confessionRoutes);
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../client/index.html"));

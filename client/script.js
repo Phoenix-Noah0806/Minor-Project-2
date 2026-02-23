@@ -1,56 +1,56 @@
-let currentUser=null;
+let currentUser = null;
 
-async function checkUser(){
-  const res = await fetch("http://localhost:5000/auth/user", {
-    credentials:"include"
+async function checkUser() {
+  const res = await fetch("http://localhost:3000/auth/user", {
+    credentials: "include",
   });
 
   const user = await res.json();
 
-  if(!user){
-    window.location.href="index.html";
+  if (!user) {
+    window.location.href = "index.html";
     return;
   }
-  currentUser=user;
+  currentUser = user;
 
-    
-  document.getElementById("authLoggedOut").style.display = "none";
-  document.getElementById("authLoggedIn").style.display = "flex";
-
-  
-  document.querySelector(".welcome-card h2").innerText =
-    "Welcome, " + user.displayName;
+  const welcome = document.querySelector(".welcome-card h2");
+  if (welcome) {
+    welcome.innerText = "Welcome, " + user.displayName;
+  }
 }
-
 
 async function logOut() {
   await fetch("http://localhost:3000/auth/logout", {
-    credentials: "include"
+    credentials: "include",
   });
 
-  window.location.href = "/index.html";
+  window.location.href = "/";
 }
 
-checkUser();
-// Store confession secret codes (in real app, this would be on backend)
-const confessionSecrets = {
-  "8F3": "secret123",
-  X92: "secret456",
-  DB4: "secret789",
-  A7X: "secret101",
-  B22: "secret202",
-};
+// checkUser();
+async function loadConfessions() {
+  const res = await fetch("http://localhost:3000/confessions");
+  const data = await res.json();
+  const container = document.getElementById("confessionContainer");
+  container.innerHTML = "";
 
-// Track user's own confessions (in real app, this would come from backend)
-const userConfessions = ["B22", "A7X"]; // User owns these confessions
+  data.forEach((c) => {
+    const card = document.createElement("div");
+    card.className = "confession-card";
 
-// Check if confession belongs to current user
-function isUserConfession(confessionId) {
-  return userConfessions.includes(confessionId);
+    card.innerHTML = `
+      <div class="card-header">
+        <span class="confession-id">${c.anonId}</span>
+        <span>${new Date(c.createdAt).toLocaleString()}</span>
+      </div>
+
+      <div class="confession-category">${c.vibe}</div>
+      <p class="confession-text">${c.text}</p>
+    `;
+
+    container.appendChild(card);
+  });
 }
-
-
-
 // Modal functionality
 document.querySelector(".write-btn").addEventListener("click", function () {
   document.getElementById("writeModal").style.display = "flex";
@@ -66,37 +66,26 @@ function closeModal() {
     .forEach((b) => b.classList.remove("active"));
 }
 
-function postConfession() {
+async function postConfession() {
   const text = document.getElementById("confessionText").value.trim();
+  const vibe = document.querySelector(".vibe-btn.active")?.dataset.vibe || "";
   const secretCode = document.getElementById("secretCode").value.trim();
-  const selectedVibe = document.querySelector(".vibe-btn.active");
-
-  if (!text) {
-    alert("Please enter your confession.");
-    return;
+  if (!text || !vibe || !secretCode) {
+    return alert("All fields are required");
   }
-
-  if (!secretCode) {
-    alert("Please enter a secret code.");
-    return;
-  }
-
-  if (!selectedVibe) {
-    alert("Please select a vibe.");
-    return;
-  }
-
-  // In real app, send to backend
-  alert("Confession posted! Secret code saved. (This is a frontend demo)");
+  await fetch("http://localhost:3000/confessions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ text, vibe, secretCode }),
+  });
   closeModal();
+  loadConfessions();
 }
 
 function openEditModal(confessionId) {
   // Only allow editing user's own confessions
-  if (!isUserConfession(confessionId)) {
-    alert("You can only edit your own confessions.");
-    return;
-  }
+  
 
   currentEditId = confessionId;
   const card = document.querySelector(`[data-confession-id="${confessionId}"]`);
@@ -140,11 +129,7 @@ function saveEdit() {
   }
 
   // Verify secret code (in real app, check with backend)
-  if (confessionSecrets[currentEditId] !== secretCode) {
-    document.getElementById("editError").textContent = "Incorrect secret code.";
-    document.getElementById("editError").style.display = "block";
-    return;
-  }
+ 
 
   if (!newText) {
     document.getElementById("editError").textContent =
@@ -176,10 +161,8 @@ function saveEdit() {
 }
 
 function openDeleteModal(confessionId) {
-  // Only allow deleting user's own confessions
-  if (!isUserConfession(confessionId)) {
-    alert("You can only delete your own confessions.");
-    return;
+  currentDeleteId = id;
+  document.getElementById("deleteModal").style.display = "flex";
   }
 
   currentDeleteId = confessionId;
@@ -193,7 +176,7 @@ function closeDeleteModal() {
   currentDeleteId = null;
 }
 
-function confirmDelete() {
+async function confirmDelete() {
   const secretCode = document.getElementById("deleteSecretCode").value.trim();
 
   if (!secretCode) {
@@ -202,6 +185,25 @@ function confirmDelete() {
     document.getElementById("deleteError").style.display = "block";
     return;
   }
+
+  const res = await fetch(`http://localhost:3000/confessions/${currentDeleteId}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ secretCode })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    document.getElementById("deleteError").textContent = data.message;
+    document.getElementById("deleteError").style.display = "block";
+    return;
+  }
+
+  closeDeleteModal();
+  loadConfessions();
+}
 
   // Verify secret code (in real app, check with backend)
   if (confessionSecrets[currentDeleteId] !== secretCode) {
@@ -219,7 +221,7 @@ function confirmDelete() {
 
   alert("Confession deleted successfully!");
   closeDeleteModal();
-}
+
 
 // Filter buttons
 document.querySelectorAll(".filter-btn").forEach((btn) => {
@@ -336,16 +338,6 @@ function unsavePost(confessionId) {
   }
 }
 
-// Initialize: auth UI + edit/delete buttons only for user's confessions
-document.addEventListener("DOMContentLoaded", function () {
-
-  userConfessions.forEach((id) => {
-    const actionsDiv = document.getElementById(`actions-${id}`);
-    if (actionsDiv) {
-      actionsDiv.style.display = "flex";
-    }
-  });
-});
 
 // Close modal on overlay click
 document.getElementById("writeModal").addEventListener("click", function (e) {
@@ -372,5 +364,5 @@ document.getElementById("historyModal").addEventListener("click", function (e) {
     showFeed();
   }
 });
-
-
+checkUser();
+loadConfessions();
