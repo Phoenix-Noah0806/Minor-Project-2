@@ -1,5 +1,25 @@
 let currentUser = null;
 let currentEditId = null;
+let currentCommentConfessionId = null;
+let confessionsById = {};
+
+function applyReactionState(card, reactions = {}, selectedType = null) {
+  const reactionTypes = ["heart", "laugh", "sad"];
+
+  reactionTypes.forEach((reactionType) => {
+    const btn = card.querySelector(
+      `.reaction-btn[data-reaction="${reactionType}"]`,
+    );
+    if (!btn) return;
+
+    const countEl = btn.querySelector(".reaction-count");
+    if (countEl) {
+      countEl.textContent = reactions[reactionType] ?? 0;
+    }
+
+    btn.classList.toggle("active", reactionType === selectedType);
+  });
+}
 async function checkUser() {
   const res = await fetch("http://localhost:3000/auth/user", {
     credentials: "include",
@@ -31,6 +51,7 @@ async function logOut() {
 async function loadConfessions() {
   const res = await fetch("http://localhost:3000/confessions");
   const data = await res.json();
+  confessionsById = Object.fromEntries(data.map((c) => [c._id, c]));
 
   const container = document.getElementById("confessionContainer");
   container.innerHTML = "";
@@ -38,33 +59,59 @@ async function loadConfessions() {
   data.forEach((c) => {
     const card = document.createElement("div");
     card.className = "confession-card";
-
     card.setAttribute("data-confession-id", c._id);
 
-    const isOwner = currentUser && currentUser.id === c.userID; // ⭐ add this
+    const tagsHTML =
+      c.tags && c.tags.length
+        ? `<div class="card-tags">
+            ${c.tags.map(tag => `<span class="tag">#${tag}</span>`).join("")}
+           </div>`
+        : "";
 
     card.innerHTML = `
-       <div class="card-header">
-    <span class="confession-id">${c.anonId}</span>
-    <span>${new Date(c.createdAt).toLocaleString()}</span>
-  </div>
+      <div class="card-header">
+        <span class="confession-id">${c.anonId}</span>
+        <span>${new Date(c.createdAt).toLocaleString()}</span>
+      </div>
 
-  <div class="confession-category">${c.vibe}</div>
-  <p class="confession-text">${c.text}</p>
+      <div class="confession-category">${c.vibe}</div>
 
-  ${
-    c.tags && c.tags.length
-      ? `<div class="card-tags">
-          ${c.tags.map((tag) => `<span class="tag">#${tag}</span>`).join("")}
-        </div>`
-      : ""
-  }
+      <p class="confession-text">${c.text}</p>
 
-  
+      ${tagsHTML}
+
+      <div class="card-footer">
+        <button class="action-btn reaction-btn" data-reaction="heart" onclick="react('${c._id}','heart')">
+          <span class="reaction-emoji">💓</span>
+          <span class="reaction-count">${c.reactions?.heart || 0}</span>
+        </button>
+
+        <button class="action-btn reaction-btn" data-reaction="laugh" onclick="react('${c._id}','laugh')">
+          <span class="reaction-emoji">😂</span>
+          <span class="reaction-count">${c.reactions?.laugh || 0}</span>
+        </button>
+
+        <button class="action-btn reaction-btn" data-reaction="sad" onclick="react('${c._id}','sad')">
+          <span class="reaction-emoji">😢</span>
+          <span class="reaction-count">${c.reactions?.sad || 0}</span>
+        </button>
+
+        <button class="action-btn" onclick="openCommentModal('${c._id}')">
+          💬 Comment (${c.comments?.length || 0})
+        </button>
+      </div>
     `;
+
+    const selectedType =
+      c.reactedUsers?.find((r) => r.userID === currentUser?.id)?.type || null;
+    applyReactionState(card, c.reactions, selectedType);
 
     container.appendChild(card);
   });
+
+  if (currentCommentConfessionId) {
+    renderCommentModal();
+  }
 }
 // Modal functionality
 document.querySelector(".write-btn").addEventListener("click", function () {
@@ -302,7 +349,109 @@ function showFeed() {
   document.querySelector(".main-container").style.display = "grid";
   closeHistoryModal();
 }
+async function react(id, type) {
+  const card = document.querySelector(`[data-confession-id="${id}"]`);
+  if (!card) return;
 
+  const res = await fetch(`http://localhost:3000/confessions/${id}/react`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ type }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const details = data?.error ? ` (${data.error})` : "";
+    alert((data.message || "Could not update reaction") + details);
+    return;
+  }
+
+  applyReactionState(card, data.reactions, data.userReaction || type);
+}
+function escapeHtml(str = "") {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function renderCommentModal() {
+  const confession = confessionsById[currentCommentConfessionId];
+  const subtitleEl = document.getElementById("commentModalSubtitle");
+  const countEl = document.getElementById("commentCount");
+  const listEl = document.getElementById("commentList");
+  if (!subtitleEl || !countEl || !listEl) return;
+
+  if (!confession) {
+    subtitleEl.textContent = "Post unavailable";
+    countEl.textContent = "0";
+    listEl.innerHTML = `<p class="comment-empty">No comments yet. Start the conversation.</p>`;
+    return;
+  }
+
+  subtitleEl.textContent = `${confession.anonId} • ${confession.vibe || "campus"}`;
+  const comments = confession.comments || [];
+  countEl.textContent = String(comments.length);
+
+  if (!comments.length) {
+    listEl.innerHTML = `<p class="comment-empty">No comments yet. Start the conversation.</p>`;
+    return;
+  }
+
+  listEl.innerHTML = comments
+    .map((comment) => {
+      const mine = comment.userID === currentUser?.id ? "you" : "anon";
+      const when = new Date(comment.createdAt || Date.now()).toLocaleString();
+      return `
+        <div class="comment-item">
+          <div class="comment-meta">${mine} • ${when}</div>
+          <div class="comment-text">${escapeHtml(comment.text || "")}</div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function openCommentModal(confessionId) {
+  currentCommentConfessionId = confessionId;
+  renderCommentModal();
+  document.getElementById("commentModal").style.display = "flex";
+}
+
+function closeCommentModal() {
+  document.getElementById("commentModal").style.display = "none";
+  document.getElementById("commentModalInput").value = "";
+}
+
+async function submitComment() {
+  if (!currentCommentConfessionId) return;
+
+  const input = document.getElementById("commentModalInput");
+  const text = input.value.trim();
+  if (!text) return;
+
+  const res = await fetch(
+    `http://localhost:3000/confessions/${currentCommentConfessionId}/comment`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ text }),
+    },
+  );
+
+  const data = await res.json();
+  if (!res.ok) {
+    alert(data.message || "Could not add comment");
+    return;
+  }
+
+  input.value = "";
+  await loadConfessions();
+}
 function closeHistoryModal() {
   document.getElementById("historyModal").style.display = "none";
 }
@@ -384,6 +533,12 @@ document.getElementById("historyModal").addEventListener("click", function (e) {
   if (e.target === this) {
     closeHistoryModal();
     showFeed();
+  }
+});
+
+document.getElementById("commentModal").addEventListener("click", function (e) {
+  if (e.target === this) {
+    closeCommentModal();
   }
 });
 (async () => {
