@@ -3,12 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Campus Whisper | Sign in or Sign up</title>
+    <meta name="description" content="The Masked Arena — Drop anonymous confessions behind a mask. No names, no judgment. Enter the game." />
+    <title>The Masked Arena | Enter the Game</title>
     <link rel="stylesheet" href="styles.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
   </head>
@@ -23,39 +24,39 @@
     <div class="landing-layout">
       <section class="landing-hero">
         <div class="landing-hero-inner">
-          <div class="landing-hero-badge">Anonymous • Safe • Free</div>
+          <div class="landing-hero-badge">Anonymous • Masked • Fearless</div>
           <h1 class="landing-hero-title">
-            <span class="landing-hero-title-main">Campus Whisper</span>
-            <span class="landing-hero-title-sub">Safe Space</span>
+            <span class="landing-hero-title-main">The Masked Arena</span>
+            <span class="landing-hero-title-sub">Everyone Hides Behind a Mask</span>
           </h1>
           <p class="landing-hero-desc">
-            Share confessions anonymously. Get support from your campus
-            community. No names, no judgment—just real conversations.
+            Drop your truth anonymously. No names, no faces — just raw, 
+            unfiltered confessions from behind the mask. The game begins now.
           </p>
           <ul class="landing-hero-features">
             <li>
-              <span class="landing-hero-check" aria-hidden="true">✓</span> 100%
-              anonymous
+              <span class="landing-hero-check" aria-hidden="true">✦</span>
+              Masked Identity
             </li>
             <li>
-              <span class="landing-hero-check" aria-hidden="true">✓</span>
-              Campus-only feed
+              <span class="landing-hero-check" aria-hidden="true">✦</span>
+              The Arena Feed
             </li>
             <li>
-              <span class="landing-hero-check" aria-hidden="true">✓</span>
-              Kindness-first rules
+              <span class="landing-hero-check" aria-hidden="true">✦</span>
+              Zero Judgement
             </li>
           </ul>
         </div>
       </section>
 
       <section class="landing-form-section">
-        <div class="landing-card" role="region" aria-label="Sign in or sign up">
+        <div class="landing-card" role="region" aria-label="Enter the Arena">
           <div class="landing-card-inner">
             <div class="landing-brand">
-              <h2 class="landing-title">Welcome back</h2>
+              <h2 class="landing-title">Enter The Arena</h2>
               <p class="landing-prompt">
-                Sign in or create an account to continue
+                Put on your mask and step inside
               </p>
             </div>
 
@@ -63,6 +64,7 @@
               <a
                 href="http://localhost:3000/auth/google"
                 class="landing-btn landing-btn-google-option"
+                id="google-signin-btn"
               >
                 <svg
                   class="landing-google-svg"
@@ -93,8 +95,7 @@
             </div>
 
             <p class="landing-terms">
-              By continuing, you agree to our terms and privacy. Add your own
-              auth when ready.
+              By entering, you agree to the arena rules. Your identity stays masked.
             </p>
           </div>
         </div>

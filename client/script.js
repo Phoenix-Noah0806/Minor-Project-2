@@ -2,6 +2,57 @@ let currentUser = null;
 let currentEditId = null;
 let currentCommentConfessionId = null;
 let confessionsById = {};
+let selectedFeedFilter = "all";
+let currentDraftId = null;
+let drafts = [];
+let savedPostIds = [];
+
+function getDraftStorageKey() {
+  return `cw_drafts_${currentUser?.id || "guest"}`;
+}
+
+function getSavedStorageKey() {
+  return `cw_saved_${currentUser?.id || "guest"}`;
+}
+
+function loadPersonalDataFromStorage() {
+  try {
+    drafts = JSON.parse(localStorage.getItem(getDraftStorageKey()) || "[]");
+    savedPostIds = JSON.parse(localStorage.getItem(getSavedStorageKey()) || "[]");
+  } catch {
+    drafts = [];
+    savedPostIds = [];
+  }
+}
+
+function persistDrafts() {
+  localStorage.setItem(getDraftStorageKey(), JSON.stringify(drafts));
+}
+
+function persistSaved() {
+  localStorage.setItem(getSavedStorageKey(), JSON.stringify(savedPostIds));
+}
+
+function updateHistoryCounts() {
+  const draftCountEl = document.getElementById("draftCount");
+  const savedCountEl = document.getElementById("savedCount");
+  if (draftCountEl) draftCountEl.textContent = `(${drafts.length})`;
+  if (savedCountEl) savedCountEl.textContent = `(${savedPostIds.length})`;
+}
+
+function normalizeVibe(vibe = "") {
+  return String(vibe).trim().toLowerCase();
+}
+
+function getFilterFromButtonText(text = "") {
+  const normalized = text.trim().toLowerCase();
+  if (normalized.includes("all")) return "all";
+  if (normalized.includes("crush")) return "crush";
+  if (normalized.includes("study")) return "study";
+  if (normalized.includes("funny")) return "funny";
+  if (normalized.includes("secret")) return "secret";
+  return "all";
+}
 
 function applyReactionState(card, reactions = {}, selectedType = null) {
   const reactionTypes = ["heart", "laugh", "sad"];
@@ -32,10 +83,12 @@ async function checkUser() {
     return;
   }
   currentUser = user;
+  loadPersonalDataFromStorage();
+  updateHistoryCounts();
 
   const welcome = document.querySelector(".welcome-card h2");
   if (welcome) {
-    welcome.innerText = "Welcome, " + user.displayName;
+    welcome.innerText = "Welcome, Player " + (user.displayName || "Unknown");
   }
 }
 
@@ -52,11 +105,16 @@ async function loadConfessions() {
   const res = await fetch("http://localhost:3000/confessions");
   const data = await res.json();
   confessionsById = Object.fromEntries(data.map((c) => [c._id, c]));
+  const filteredData =
+    selectedFeedFilter === "all"
+      ? data
+      : data.filter((c) => normalizeVibe(c.vibe) === selectedFeedFilter);
 
   const container = document.getElementById("confessionContainer");
   container.innerHTML = "";
 
-  data.forEach((c) => {
+  filteredData.forEach((c) => {
+    const isSaved = savedPostIds.includes(c._id);
     const card = document.createElement("div");
     card.className = "confession-card";
     card.setAttribute("data-confession-id", c._id);
@@ -68,13 +126,16 @@ async function loadConfessions() {
            </div>`
         : "";
 
+    const vibeEmojis = { crush: '💘', study: '📖', funny: '😈', secret: '🤫' };
+    const vibeLabel = vibeEmojis[normalizeVibe(c.vibe)] ? `${vibeEmojis[normalizeVibe(c.vibe)]} ${c.vibe}` : c.vibe;
+
     card.innerHTML = `
       <div class="card-header">
         <span class="confession-id">${c.anonId}</span>
         <span>${new Date(c.createdAt).toLocaleString()}</span>
       </div>
 
-      <div class="confession-category">${c.vibe}</div>
+      <div class="confession-category">${vibeLabel}</div>
 
       <p class="confession-text">${c.text}</p>
 
@@ -82,22 +143,26 @@ async function loadConfessions() {
 
       <div class="card-footer">
         <button class="action-btn reaction-btn" data-reaction="heart" onclick="react('${c._id}','heart')">
-          <span class="reaction-emoji">💓</span>
+          <span class="reaction-emoji">💗</span>
           <span class="reaction-count">${c.reactions?.heart || 0}</span>
         </button>
 
         <button class="action-btn reaction-btn" data-reaction="laugh" onclick="react('${c._id}','laugh')">
-          <span class="reaction-emoji">😂</span>
+          <span class="reaction-emoji">😈</span>
           <span class="reaction-count">${c.reactions?.laugh || 0}</span>
         </button>
 
         <button class="action-btn reaction-btn" data-reaction="sad" onclick="react('${c._id}','sad')">
-          <span class="reaction-emoji">😢</span>
+          <span class="reaction-emoji">💀</span>
           <span class="reaction-count">${c.reactions?.sad || 0}</span>
         </button>
 
         <button class="action-btn" onclick="openCommentModal('${c._id}')">
-          💬 Comment (${c.comments?.length || 0})
+          🎭 Chat (${c.comments?.length || 0})
+        </button>
+
+        <button class="action-btn" onclick="toggleSavePost('${c._id}')">
+          ${isSaved ? "★ Unsave" : "☆ Save"}
         </button>
       </div>
     `;
@@ -109,17 +174,23 @@ async function loadConfessions() {
     container.appendChild(card);
   });
 
+  if (!filteredData.length) {
+    container.innerHTML = `<div class="confession-card"><p class="confession-text">🎭 No messages found in the arena for this filter. Be the first to drop one.</p></div>`;
+  }
+
   if (currentCommentConfessionId) {
     renderCommentModal();
   }
 }
 // Modal functionality
 document.querySelector(".write-btn").addEventListener("click", function () {
+  currentDraftId = null;
   document.getElementById("writeModal").style.display = "flex";
 });
 
 function closeModal() {
   document.getElementById("writeModal").style.display = "none";
+  currentDraftId = null;
   document.getElementById("confessionText").value = "";
   document.getElementById("confessionTags").value = "";
   document.getElementById("secretCode").value = "";
@@ -143,8 +214,50 @@ async function postConfession() {
     credentials: "include",
     body: JSON.stringify({ text, vibe, secretCode, tags }),
   });
+  if (currentDraftId) {
+    drafts = drafts.filter((d) => d.id !== currentDraftId);
+    persistDrafts();
+    updateHistoryCounts();
+  }
   closeModal();
   loadConfessions();
+}
+
+function saveDraft() {
+  const text = document.getElementById("confessionText").value.trim();
+  const vibe = document.querySelector(".vibe-btn.active")?.dataset.vibe || "";
+  const secretCode = document.getElementById("secretCode").value.trim();
+  const tagsRaw = document.getElementById("confessionTags").value.trim();
+  const tags = tagsRaw ? tagsRaw.split(",").map((t) => t.trim()) : [];
+
+  if (!text && !vibe && !secretCode && !tagsRaw) {
+    alert("Nothing to save as draft.");
+    return;
+  }
+
+  const now = new Date().toISOString();
+  const draft = {
+    id: currentDraftId || `draft_${Date.now()}`,
+    text,
+    vibe,
+    secretCode,
+    tags,
+    updatedAt: now,
+    createdAt: now,
+  };
+
+  const existingIndex = drafts.findIndex((d) => d.id === draft.id);
+  if (existingIndex >= 0) {
+    draft.createdAt = drafts[existingIndex].createdAt || now;
+    drafts[existingIndex] = draft;
+  } else {
+    drafts.unshift(draft);
+  }
+
+  persistDrafts();
+  updateHistoryCounts();
+  closeModal();
+  alert("Draft saved.");
 }
 
 async function loadMyPosts() {
@@ -185,6 +298,8 @@ function showHistory() {
   document.getElementById("historyModal").style.display = "flex";
 
   loadMyPosts();
+  loadDrafts();
+  loadSavedPosts();
 }
 function openEditModal(confessionId) {
   // Only allow editing user's own confessions
@@ -306,6 +421,8 @@ document.querySelectorAll(".filter-btn").forEach((btn) => {
       .querySelectorAll(".filter-btn")
       .forEach((b) => b.classList.remove("active"));
     this.classList.add("active");
+    selectedFeedFilter = getFilterFromButtonText(this.textContent);
+    loadConfessions();
   });
 });
 
@@ -386,24 +503,24 @@ function renderCommentModal() {
   if (!subtitleEl || !countEl || !listEl) return;
 
   if (!confession) {
-    subtitleEl.textContent = "Post unavailable";
+    subtitleEl.textContent = "Message eliminated";
     countEl.textContent = "0";
     listEl.innerHTML = `<p class="comment-empty">No comments yet. Start the conversation.</p>`;
     return;
   }
 
-  subtitleEl.textContent = `${confession.anonId} • ${confession.vibe || "campus"}`;
+  subtitleEl.textContent = `🎭 ${confession.anonId} • ${confession.vibe || "arena"}`;
   const comments = confession.comments || [];
   countEl.textContent = String(comments.length);
 
   if (!comments.length) {
-    listEl.innerHTML = `<p class="comment-empty">No comments yet. Start the conversation.</p>`;
+    listEl.innerHTML = `<p class="comment-empty">🎭 No arena chat yet. Break the silence.</p>`;
     return;
   }
 
   listEl.innerHTML = comments
     .map((comment) => {
-      const mine = comment.userID === currentUser?.id ? "you" : "anon";
+      const mine = comment.userID === currentUser?.id ? "you" : "masked player";
       const when = new Date(comment.createdAt || Date.now()).toLocaleString();
       return `
         <div class="comment-item">
@@ -476,6 +593,9 @@ function showHistoryTab(tabName, tabEl) {
         : "historySaved";
   document.getElementById(contentId).classList.add("active");
   if (tabEl) tabEl.classList.add("active");
+
+  if (tabName === "drafts") loadDrafts();
+  if (tabName === "saved") loadSavedPosts();
 }
 
 function viewPost(confessionId) {
@@ -492,22 +612,113 @@ function viewPost(confessionId) {
   }
 }
 
+function loadDrafts() {
+  const container = document.getElementById("draftsContainer");
+  if (!container) return;
+  container.innerHTML = "";
+
+  if (!drafts.length) {
+    container.innerHTML = `<div class="empty-state"><p>No drafts saved.</p></div>`;
+    return;
+  }
+
+  drafts
+    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+    .forEach((draft) => {
+      const preview = draft.text || "(No text yet)";
+      const item = document.createElement("div");
+      item.className = "history-post-item draft";
+      item.innerHTML = `
+        <p class="post-preview">${escapeHtml(preview)}</p>
+        <div class="post-meta">
+          <span>Saved as draft</span>
+          <span>•</span>
+          <span>${new Date(draft.updatedAt || draft.createdAt).toLocaleString()}</span>
+        </div>
+        <div class="history-post-actions">
+          <button class="history-action-btn" onclick="continueDraft('${draft.id}')">Continue</button>
+          <button class="history-action-btn delete" onclick="deleteDraft('${draft.id}')">Delete</button>
+        </div>
+      `;
+      container.appendChild(item);
+    });
+}
+
 function continueDraft(draftId) {
+  const draft = drafts.find((d) => d.id === draftId);
+  if (!draft) return;
+
+  currentDraftId = draft.id;
   closeHistoryModal();
   document.getElementById("writeModal").style.display = "flex";
-  // In real app, load draft content
+  document.getElementById("confessionText").value = draft.text || "";
+  document.getElementById("confessionTags").value = (draft.tags || []).join(", ");
+  document.getElementById("secretCode").value = draft.secretCode || "";
+
+  document.querySelectorAll(".vibe-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.vibe === draft.vibe);
+  });
 }
 
 function deleteDraft(draftId) {
-  if (confirm("Delete this draft?")) {
-    event.target.closest(".history-post-item").remove();
+  drafts = drafts.filter((d) => d.id !== draftId);
+  persistDrafts();
+  updateHistoryCounts();
+  loadDrafts();
+}
+
+function loadSavedPosts() {
+  const container = document.getElementById("savedContainer");
+  if (!container) return;
+  container.innerHTML = "";
+
+  const savedPosts = savedPostIds
+    .map((id) => confessionsById[id])
+    .filter(Boolean);
+
+  if (!savedPosts.length) {
+    container.innerHTML = `<div class="empty-state"><p>No saved posts yet.</p></div>`;
+    return;
   }
+
+  savedPosts.forEach((post) => {
+    const item = document.createElement("div");
+    item.className = "history-post-item saved";
+    item.innerHTML = `
+      <p class="post-preview">${escapeHtml(post.text || "")}</p>
+      <div class="post-meta">
+        <span>Saved</span>
+        <span>•</span>
+        <span>${new Date(post.createdAt).toLocaleString()}</span>
+        <span>•</span>
+        <span class="post-id">${post.anonId}</span>
+      </div>
+      <div class="history-post-actions">
+        <button class="history-action-btn" onclick="viewPost('${post._id}')">View</button>
+        <button class="history-action-btn delete" onclick="unsavePost('${post._id}')">Unsave</button>
+      </div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+function toggleSavePost(confessionId) {
+  if (savedPostIds.includes(confessionId)) {
+    savedPostIds = savedPostIds.filter((id) => id !== confessionId);
+  } else {
+    savedPostIds.unshift(confessionId);
+  }
+  persistSaved();
+  updateHistoryCounts();
+  loadConfessions();
 }
 
 function unsavePost(confessionId) {
-  if (confirm("Unsave this post?")) {
-    event.target.closest(".history-post-item").remove();
-  }
+  savedPostIds = savedPostIds.filter((id) => id !== confessionId);
+  persistSaved();
+  updateHistoryCounts();
+  loadSavedPosts();
+  loadConfessions();
 }
 
 // Close modal on overlay click

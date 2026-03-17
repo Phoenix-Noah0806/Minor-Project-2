@@ -3,16 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Campus Whisper | Safe Space</title>
+    <meta name="description" content="The Masked Arena — Anonymous confessions from behind the mask. Drop messages, react, and chat in the arena." />
+    <title>The Masked Arena | The Arena</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <!-- Navigation Header -->
     <header class="header">
       <div class="container">
         <div class="logo">
-          <h1>🎓 Campus Whisper</h1>
-          <span class="tagline">Safe Space</span>
+          <h1>🎭 The Masked Arena</h1>
+          <span class="tagline">Everyone Hides</span>
         </div>
         <nav class="nav">
           <a
@@ -22,7 +29,7 @@
               event.preventDefault();
               showFeed();
             "
-            >Campus Feed</a
+            >The Arena</a
           >
           <a
             href="#history"
@@ -31,9 +38,9 @@
               event.preventDefault();
               showHistory();
             "
-            >My History</a
+            >My Missions</a
           >
-          <a href="#write" class="nav-link write-btn">Write Secret</a>
+          <a href="#write" class="nav-link write-btn">Drop Message</a>
         </nav>
         <div class="auth-actions">
           <div class="auth-buttons">
@@ -45,7 +52,7 @@
                 logOut();
               "
             >
-              Log out
+              Exit Arena
             </a>
           </div>
         </div>
@@ -57,68 +64,68 @@
       <!-- Sidebar -->
       <aside class="sidebar">
         <div class="welcome-card">
-          <h2>Welcome back, friend.</h2>
+          <h2>Welcome, Player.</h2>
         </div>
 
         <!-- Trending Section -->
         <div class="trending-section">
-          <h3>🔥 Trending on Campus</h3>
+          <h3>🔥 Arena Buzz</h3>
           <div class="trending-item">
-            <span class="trending-icon">🎓</span>
+            <span class="trending-icon">🎭</span>
             <div class="trending-content">
-              <span class="trending-title">Study Stress</span>
+              <span class="trending-title">Masked Confession</span>
               <span class="trending-time">2m ago</span>
             </div>
           </div>
           <div class="trending-item">
-            <span class="trending-icon">❤️</span>
+            <span class="trending-icon">💀</span>
             <div class="trending-content">
-              <span class="trending-title">Crush</span>
+              <span class="trending-title">Dark Secret</span>
               <span class="trending-time">15m ago</span>
             </div>
           </div>
           <div class="trending-item">
-            <span class="trending-icon">🤣</span>
+            <span class="trending-icon">🃏</span>
             <div class="trending-content">
-              <span class="trending-title">Funny</span>
+              <span class="trending-title">Plot Twist</span>
               <span class="trending-time">1h ago</span>
             </div>
           </div>
         </div>
 
-        <!-- Safe Space Rules -->
+        <!-- Arena Rules -->
         <div class="rules-section">
-          <h3>Safe Space Rules</h3>
+          <h3>Arena Rules</h3>
           <ul class="rules-list">
-            <li>✓ Be Kind & Support</li>
-            <li>✓ No Names (Anonymity First)</li>
-            <li>✓ No Bullying</li>
+            <li>✦ Hide Your Identity</li>
+            <li>✦ No Real Names</li>
+            <li>✦ Respect The Game</li>
           </ul>
         </div>
 
-        <!-- Hot Topics -->
+        <!-- Arena Tags -->
         <div class="topics-section">
-          <h3>Hot Topics</h3>
+          <h3>Arena Tags</h3>
           <div class="topics-grid">
-            <span class="topic-tag">#finals_week</span>
-            <span class="topic-tag">#library_crush</span>
-            <span class="topic-tag">#lost_airpods</span>
+            <span class="topic-tag">#masked_truth</span>
+            <span class="topic-tag">#campus_secrets</span>
+            <span class="topic-tag">#late_night_feels</span>
           </div>
         </div>
 
-        <!-- Campus Mood -->
+        <!-- Arena Pulse -->
         <div class="mood-section">
-          <h3>Campus Mood</h3>
+          <h3>Arena Pulse</h3>
           <div class="mood-bar">
             <div class="mood-item">
-              <span>Stressed</span>
+              <span>Intense</span>
               <div class="mood-progress">
                 <div class="mood-fill stressed" style="width: 60%"></div>
               </div>
               <span class="mood-percent">60%</span>
             </div>
             <div class="mood-item">
-              <span>Happy</span>
+              <span>Chill</span>
               <div class="mood-progress">
                 <div class="mood-fill happy" style="width: 25%"></div>
               </div>
@@ -131,13 +138,13 @@
       <!-- Main Feed -->
       <main class="feed-container">
         <div class="feed-header">
-          <h2>Campus Feed</h2>
+          <h2>The Arena</h2>
           <div class="filter-buttons">
-            <button class="filter-btn active">All</button>
-            <button class="filter-btn">❤️ Crush</button>
-            <button class="filter-btn">📚 Study</button>
-            <button class="filter-btn">🤣 Funny</button>
-            <button class="filter-btn">😶 Secret</button>
+            <button class="filter-btn active">🎭 All</button>
+            <button class="filter-btn">💘 Crush</button>
+            <button class="filter-btn">📖 Study</button>
+            <button class="filter-btn">😈 Funny</button>
+            <button class="filter-btn">🤫 Secret</button>
           </div>
         </div>
 
@@ -147,76 +154,76 @@
         </div>
       </main>
 
-      <!-- Right Sidebar - Personal Space -->
+      <!-- Right Sidebar - Player Dashboard -->
       <aside class="personal-sidebar">
         <div class="personal-header">
-          <h3>My Personal Space</h3>
+          <h3>Player Dashboard</h3>
           <div class="user-profile">
-            <span class="profile-id">Student #294</span>
-            <span class="profile-faculty">Faculty of Science</span>
+            <span class="profile-id">Player #294</span>
+            <span class="profile-faculty">Unknown Division</span>
           </div>
         </div>
 
         <div class="stats-section">
           <div class="stat-item">
             <span class="stat-number">0</span>
-            <span class="stat-label">Secrets</span>
+            <span class="stat-label">Drops</span>
           </div>
           <div class="stat-item">
             <span class="stat-number">0</span>
-            <span class="stat-label">Hearts</span>
+            <span class="stat-label">Reactions</span>
           </div>
         </div>
 
         <div class="campus-stats">
-          <h4>Campus Trends</h4>
+          <h4>Arena Intel</h4>
           <div class="stat-row">
-            <span>Most Active Hours</span>
+            <span>Peak Hours</span>
             <span>8-10 PM</span>
           </div>
           <div class="stat-row">
-            <span>Weekly Mood Cloud</span>
-            <span>Stressed</span>
+            <span>Arena Mood</span>
+            <span>🔥 Intense</span>
           </div>
           <div class="stat-row">
-            <span>Total Confessions</span>
+            <span>Total Messages</span>
             <span>14,204</span>
           </div>
           <div class="stat-row">
-            <span>Support Given</span>
+            <span>Reactions Given</span>
             <span>85.4k</span>
           </div>
           <div class="stat-row">
-            <span>Campuses Online</span>
+            <span>Arenas Online</span>
             <span>12</span>
           </div>
         </div>
       </aside>
     </div>
 
-    <!-- Write Secret Modal -->
+    <!-- Drop Message Modal -->
     <div class="modal-overlay" id="writeModal">
       <div class="modal-content">
         <div class="modal-header">
-          <h2>Share a Secret</h2>
+          <h2>Drop a Masked Message</h2>
           <button class="close-btn" onclick="closeModal()">×</button>
         </div>
         <div class="modal-body">
-          <p class="modal-subtitle">What's on your mind?</p>
+          <p class="modal-subtitle">Message from the masked — what's behind your mask?</p>
           <textarea
             id="confessionText"
             class="confession-input"
-            placeholder="Type your confession here... Remember, you're anonymous and safe here."
+            placeholder="Drop your truth here... You're masked and safe in the arena."
             rows="8"
             required
           ></textarea>
           <div class="vibe-selector">
-            <p>Choose a Vibe:</p>
+            <p>Choose Your Mask Vibe:</p>
             <div class="vibe-buttons">
-              <button class="vibe-btn" data-vibe="crush">❤️ Crush</button>
-              <button class="vibe-btn" data-vibe="study">📚 Study</button>
-              <button class="vibe-btn" data-vibe="funny">🤣 Funny</button>
-              <button class="vibe-btn" data-vibe="secret">😶 Secret</button>
+              <button class="vibe-btn" data-vibe="crush">💘 Crush</button>
+              <button class="vibe-btn" data-vibe="study">📖 Study</button>
+              <button class="vibe-btn" data-vibe="funny">😈 Funny</button>
+              <button class="vibe-btn" data-vibe="secret">🤫 Secret</button>
             </div>
           </div>
           <div class="tag-input-section">
@@ -229,10 +236,9 @@
             />
           </div>
           <div class="secret-code-section">
-            <p>Enter Secret Code <span class="required">*</span></p>
+            <p>Secret Code <span class="required">*</span></p>
             <p class="secret-hint">
-              Create a secret code to edit or delete this confession later. Keep
-              it safe!
+              Create a code to edit or eliminate this message later. Guard it well.
             </p>
             <input
               type="password"
@@ -245,28 +251,29 @@
         </div>
         <div class="modal-footer">
           <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+          <button class="cancel-btn" onclick="saveDraft()">Save Draft</button>
           <button class="post-btn" onclick="postConfession()">
-            Anonymous Post Secret
+            Drop Message
           </button>
         </div>
         <div class="modal-note">
           <p>
-            By posting, you agree to being kind. 100% Anonymous • Free To Use
+            By dropping, you accept the arena rules. 100% Masked • Free To Play
           </p>
         </div>
       </div>
     </div>
 
-    <!-- Edit Confession Modal -->
+    <!-- Edit Message Modal -->
     <div class="modal-overlay" id="editModal">
       <div class="modal-content">
         <div class="modal-header">
-          <h2>Edit Confession</h2>
+          <h2>Edit Your Message</h2>
           <button class="close-btn" onclick="closeEditModal()">×</button>
         </div>
         <div class="modal-body">
           <div class="secret-code-section">
-            <p>Enter Secret Code <span class="required">*</span></p>
+            <p>Secret Code <span class="required">*</span></p>
             <input
               type="password"
               id="editSecretCode"
@@ -279,13 +286,13 @@
               id="editError"
               style="
                 display: none;
-                color: #ef4444;
+                color: #ff2240;
                 font-size: 0.875rem;
                 margin-top: 0.5rem;
               "
             ></p>
           </div>
-          <p class="modal-subtitle">Edit your confession:</p>
+          <p class="modal-subtitle">Edit your masked message:</p>
           <textarea
             id="editConfessionText"
             class="confession-input"
@@ -295,16 +302,16 @@
             <p>Choose a Vibe:</p>
             <div class="vibe-buttons">
               <button class="vibe-btn edit-vibe-btn" data-vibe="crush">
-                ❤️ Crush
+                💘 Crush
               </button>
               <button class="vibe-btn edit-vibe-btn" data-vibe="study">
-                📚 Study
+                📖 Study
               </button>
               <button class="vibe-btn edit-vibe-btn" data-vibe="funny">
-                🤣 Funny
+                😈 Funny
               </button>
               <button class="vibe-btn edit-vibe-btn" data-vibe="secret">
-                😶 Secret
+                🤫 Secret
               </button>
             </div>
           </div>
@@ -316,21 +323,21 @@
       </div>
     </div>
 
-    <!-- Comments Modal -->
+    <!-- Arena Chat (Comments) Modal -->
     <div class="modal-overlay" id="commentModal">
       <div class="modal-content comment-modal-content">
         <div class="modal-header">
           <div>
-            <h2>Comments</h2>
+            <h2>Arena Chat</h2>
             <p class="comment-modal-subtitle" id="commentModalSubtitle">
-              Campus Feed
+              The Arena
             </p>
           </div>
           <button class="close-btn" onclick="closeCommentModal()">×</button>
         </div>
         <div class="modal-body">
           <div class="comment-modal-count">
-            Total comments: <span id="commentCount">0</span>
+            Total messages: <span id="commentCount">0</span>
           </div>
           <div class="comment-list" id="commentList"></div>
         </div>
@@ -339,18 +346,18 @@
             type="text"
             id="commentModalInput"
             class="comment-modal-input"
-            placeholder="Write your comment..."
+            placeholder="Send a message to the arena..."
           />
           <button class="post-btn" onclick="submitComment()">Send</button>
         </div>
       </div>
     </div>
 
-    <!-- My History Modal -->
+    <!-- My Missions (History) Modal -->
     <div class="modal-overlay" id="historyModal">
       <div class="modal-content history-content">
         <div class="modal-header">
-          <h2>My History</h2>
+          <h2>My Missions</h2>
           <button class="close-btn" onclick="closeHistoryModal()">×</button>
         </div>
         <div class="modal-body">
@@ -359,20 +366,20 @@
               class="history-tab active"
               onclick="showHistoryTab('posts', this)"
             >
-              My Posts
+              My Drops
             </button>
             <button
               class="history-tab"
               onclick="showHistoryTab('drafts', this)"
             >
-              Drafts <span class="tab-count">(3)</span>
+              Drafts <span class="tab-count" id="draftCount">(0)</span>
             </button>
             <button class="history-tab" onclick="showHistoryTab('saved', this)">
-              Saved
+              Saved <span class="tab-count" id="savedCount">(0)</span>
             </button>
           </div>
 
-          <!-- My Posts Tab -->
+          <!-- My Drops Tab -->
           <div id="historyPosts" class="history-tab-content active">
             <div class="history-posts-list" id="myPostsContainer">
               
@@ -381,130 +388,36 @@
 
           <!-- Drafts Tab -->
           <div id="historyDrafts" class="history-tab-content">
-            <div class="history-posts-list">
-              <div class="history-post-item draft">
-                <p class="post-preview">
-                  I have something to say but I'm not sure if I should post
-                  it...
-                </p>
-                <div class="post-meta">
-                  <span>Saved as draft</span>
-                  <span>•</span>
-                  <span>Yesterday</span>
-                </div>
-                <div class="history-post-actions">
-                  <button class="history-action-btn" onclick="continueDraft(1)">
-                    Continue
-                  </button>
-                  <button
-                    class="history-action-btn delete"
-                    onclick="deleteDraft(1)"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-              <div class="history-post-item draft">
-                <p class="post-preview">This is my second draft...</p>
-                <div class="post-meta">
-                  <span>Saved as draft</span>
-                  <span>•</span>
-                  <span>3 days ago</span>
-                </div>
-                <div class="history-post-actions">
-                  <button class="history-action-btn" onclick="continueDraft(2)">
-                    Continue
-                  </button>
-                  <button
-                    class="history-action-btn delete"
-                    onclick="deleteDraft(2)"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-              <div class="history-post-item draft">
-                <p class="post-preview">
-                  Another draft waiting to be published...
-                </p>
-                <div class="post-meta">
-                  <span>Saved as draft</span>
-                  <span>•</span>
-                  <span>1 week ago</span>
-                </div>
-                <div class="history-post-actions">
-                  <button class="history-action-btn" onclick="continueDraft(3)">
-                    Continue
-                  </button>
-                  <button
-                    class="history-action-btn delete"
-                    onclick="deleteDraft(3)"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-              <div class="empty-state" id="emptyDrafts" style="display: none">
-                <p>No drafts saved.</p>
-              </div>
-            </div>
+            <div class="history-posts-list" id="draftsContainer"></div>
           </div>
 
           <!-- Saved Tab -->
           <div id="historySaved" class="history-tab-content">
-            <div class="history-posts-list">
-              <div class="history-post-item saved">
-                <p class="post-preview">
-                  To the guy in the blue hoodie at the library: I dropped my
-                  pen...
-                </p>
-                <div class="post-meta">
-                  <span>Saved</span>
-                  <span>•</span>
-                  <span>2 days ago</span>
-                  <span>•</span>
-                  <span class="post-id">#X92</span>
-                </div>
-                <div class="history-post-actions">
-                  <button class="history-action-btn" onclick="viewPost('X92')">
-                    View
-                  </button>
-                  <button
-                    class="history-action-btn delete"
-                    onclick="unsavePost('X92')"
-                  >
-                    Unsave
-                  </button>
-                </div>
-              </div>
-              <div class="empty-state" id="emptySaved" style="display: none">
-                <p>No saved posts yet.</p>
-              </div>
-            </div>
+            <div class="history-posts-list" id="savedContainer"></div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Delete Confession Modal -->
+    <!-- Eliminate Message (Delete) Modal -->
     <div class="modal-overlay" id="deleteModal">
       <div class="modal-content">
         <div class="modal-header">
-          <h2>Delete Confession</h2>
+          <h2>Eliminate Message</h2>
           <button class="close-btn" onclick="closeDeleteModal()">×</button>
         </div>
         <div class="modal-body">
           <p class="modal-subtitle">
-            Are you sure you want to delete this confession? This action cannot
-            be undone.
+            ⚠️ This message will be permanently eliminated from the arena. 
+            This action cannot be undone.
           </p>
           <div class="secret-code-section">
-            <p>Enter Secret Code <span class="required">*</span></p>
+            <p>Secret Code <span class="required">*</span></p>
             <input
               type="password"
               id="deleteSecretCode"
               class="secret-code-input"
-              placeholder="Enter secret code to delete"
+              placeholder="Enter secret code to eliminate"
               required
             />
             <p
@@ -512,7 +425,7 @@
               id="deleteError"
               style="
                 display: none;
-                color: #ef4444;
+                color: #ff2240;
                 font-size: 0.875rem;
                 margin-top: 0.5rem;
               "
@@ -524,7 +437,7 @@
             Cancel
           </button>
           <button class="delete-confirm-btn" onclick="confirmDelete()">
-            Delete Confession
+            Eliminate Message
           </button>
         </div>
       </div>
