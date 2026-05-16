@@ -8,11 +8,13 @@ import path from "path";
 import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
 import confessionRoutes from './routes/confessionRoutes.js'
+import createStatsRouter from "./routes/statsRoutes.js";
 dotenv.config();
 
 const app = express();
 connectDB()
 
+const activePlayers = new Map();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,8 +35,16 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use((req, res, next) => {
+  if (req.user?.id) {
+    activePlayers.set(req.user.id, Date.now());
+  }
+  next();
+});
+
 app.use("/auth", authRoutes);
 app.use("/confessions", confessionRoutes);
+app.use("/stats", createStatsRouter({ activePlayers }));
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../client/index.html"));

@@ -3,9 +3,11 @@ let currentEditId = null;
 let currentCommentConfessionId = null;
 let confessionsById = {};
 let selectedFeedFilter = "all";
+let selectedTagFilter = null;
 let currentDraftId = null;
 let drafts = [];
 let savedPostIds = [];
+let sidebarRefreshTimer = null;
 
 function getDraftStorageKey() {
   return `cw_drafts_${currentUser?.id || "guest"}`;
@@ -44,6 +46,29 @@ function normalizeVibe(vibe = "") {
   return String(vibe).trim().toLowerCase();
 }
 
+function normalizeTag(tag = "") {
+  return String(tag).trim().replace(/^#/, "").toLowerCase();
+}
+
+function formatCompactNumber(value) {
+  const n = Number(value) || 0;
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}m`.replace(".0", "");
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`.replace(".0", "");
+  return String(Math.round(n));
+}
+
+function updateFeedTitle() {
+  const titleEl = document.querySelector(".feed-header h2");
+  if (!titleEl) return;
+
+  let title = "The Arena";
+  if (selectedTagFilter) title += ` • #${selectedTagFilter}`;
+  if (selectedFeedFilter && selectedFeedFilter !== "all") {
+    title += ` • ${selectedFeedFilter}`;
+  }
+  titleEl.textContent = title;
+}
+
 function getFilterFromButtonText(text = "") {
   const normalized = text.trim().toLowerCase();
   if (normalized.includes("all")) return "all";
@@ -70,6 +95,180 @@ function applyReactionState(card, reactions = {}, selectedType = null) {
 
     btn.classList.toggle("active", reactionType === selectedType);
   });
+}
+
+function getBuzzIcon(tag) {
+  const t = normalizeTag(tag);
+  if (t.includes("crush")) return "💘";
+  if (t.includes("study")) return "📚";
+  if (t.includes("secret")) return "💀";
+  if (t.includes("funny")) return "🃏";
+  if (t.includes("night")) return "🌙";
+  return "🎭";
+}
+
+function setTagFilter(tag) {
+  const normalized = tag ? normalizeTag(tag) : null;
+  selectedTagFilter = normalized || null;
+  updateFeedTitle();
+  updateTagActiveState();
+  loadConfessions();
+}
+
+function updateTagActiveState() {
+  document.querySelectorAll(".topic-tag").forEach((el) => {
+    const raw = el.getAttribute("data-tag") || "";
+    const t = normalizeTag(raw ? decodeURIComponent(raw) : "");
+
+    if (!selectedTagFilter) {
+      el.classList.toggle("active", !t);
+      return;
+    }
+
+    el.classList.toggle("active", t === selectedTagFilter);
+  });
+}
+
+function renderTrending(trendingTags = []) {
+  const listEl = document.getElementById("trendingList");
+  const emptyEl = document.getElementById("trendingEmpty");
+  if (!listEl || !emptyEl) return;
+
+  const top = (trendingTags || []).slice(0, 3);
+  if (!top.length) {
+    listEl.innerHTML = "";
+    emptyEl.style.display = "block";
+    return;
+  }
+
+  emptyEl.style.display = "none";
+  listEl.innerHTML = top
+    .map((t) => {
+      const tag = normalizeTag(t.tag);
+      const title = `#${escapeHtml(tag)}`;
+      const timeLabel = escapeHtml(t.timeLabel || "");
+      const icon = getBuzzIcon(tag);
+      return `
+        <div class="trending-item" data-tag="${encodeURIComponent(tag)}">
+          <span class="trending-icon">${icon}</span>
+          <div class="trending-content">
+            <span class="trending-title">${title}</span>
+            <span class="trending-time">${timeLabel}</span>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  listEl.querySelectorAll(".trending-item").forEach((item) => {
+    item.addEventListener("click", () => {
+      const tag = decodeURIComponent(item.getAttribute("data-tag") || "");
+      setTagFilter(tag === selectedTagFilter ? null : tag);
+    });
+  });
+}
+
+function renderArenaTags(trendingTags = []) {
+  const tagsEl = document.getElementById("arenaTags");
+  if (!tagsEl) return;
+
+  const tags = (trendingTags || [])
+    .map((t) => normalizeTag(t.tag))
+    .filter(Boolean)
+    .slice(0, 8);
+
+  tagsEl.innerHTML = [
+    `<span class="topic-tag ${selectedTagFilter ? "" : "active"}" data-tag="">#all</span>`,
+    ...tags.map(
+      (tag) =>
+        `<span class="topic-tag ${tag === selectedTagFilter ? "active" : ""}" data-tag="${encodeURIComponent(tag)}">#${escapeHtml(tag)}</span>`,
+    ),
+  ].join("");
+
+  tagsEl.querySelectorAll(".topic-tag").forEach((el) => {
+    el.addEventListener("click", () => {
+      const raw = el.getAttribute("data-tag") || "";
+      const tag = raw ? decodeURIComponent(raw) : null;
+      setTagFilter(tag === selectedTagFilter ? null : tag);
+    });
+  });
+}
+
+function applyMoodUI(mood) {
+  const intenseFill = document.getElementById("moodIntenseFill");
+  const intensePctEl = document.getElementById("moodIntensePercent");
+  const chillFill = document.getElementById("moodChillFill");
+  const chillPctEl = document.getElementById("moodChillPercent");
+
+  if (intenseFill) intenseFill.style.width = `${mood?.intensePct ?? 0}%`;
+  if (intensePctEl) intensePctEl.textContent = `${mood?.intensePct ?? 0}%`;
+  if (chillFill) chillFill.style.width = `${mood?.chillPct ?? 0}%`;
+  if (chillPctEl) chillPctEl.textContent = `${mood?.chillPct ?? 0}%`;
+}
+
+function applyPlayerUI(meStats) {
+  const playerNumberEl = document.getElementById("playerNumber");
+  const playerDivisionEl = document.getElementById("playerDivision");
+  const dropsEl = document.getElementById("statDrops");
+  const reactionsEl = document.getElementById("statReactionsReceived");
+
+  if (playerNumberEl) {
+    const n = meStats?.player?.number;
+    playerNumberEl.textContent = n ? `Player #${n}` : "Player";
+  }
+  if (playerDivisionEl) {
+    playerDivisionEl.textContent = meStats?.player?.division || "Unknown Division";
+  }
+  if (dropsEl) dropsEl.textContent = String(meStats?.stats?.drops ?? 0);
+  if (reactionsEl) reactionsEl.textContent = String(meStats?.stats?.reactionsReceived ?? 0);
+}
+
+function applyIntelUI(globalStats) {
+  const peakEl = document.getElementById("intelPeakHours");
+  const moodEl = document.getElementById("intelMood");
+  const totalMsgEl = document.getElementById("intelTotalMessages");
+  const totalReactEl = document.getElementById("intelTotalReactions");
+  const activeEl = document.getElementById("intelActiveUsers");
+
+  if (peakEl) peakEl.textContent = globalStats?.peakHours || "—";
+
+  const moodLabel = globalStats?.mood?.label;
+  if (moodEl) moodEl.textContent = moodLabel ? `${moodLabel.emoji} ${moodLabel.text}` : "—";
+
+  if (totalMsgEl) {
+    totalMsgEl.textContent = formatCompactNumber(globalStats?.totals?.messages ?? 0);
+  }
+  if (totalReactEl) {
+    totalReactEl.textContent = formatCompactNumber(globalStats?.totals?.reactions ?? 0);
+  }
+  if (activeEl) activeEl.textContent = String(globalStats?.activeUsers ?? 0);
+}
+
+async function loadSidebarData() {
+  try {
+    const [globalRes, meRes] = await Promise.all([
+      fetch("http://localhost:3000/stats/global"),
+      fetch("http://localhost:3000/stats/me", { credentials: "include" }),
+    ]);
+
+    const globalStats = await globalRes.json();
+    applyIntelUI(globalStats);
+    applyMoodUI(globalStats?.mood);
+    renderTrending(globalStats?.trendingTags || []);
+    renderArenaTags(globalStats?.trendingTags || []);
+
+    if (meRes.ok) {
+      const meStats = await meRes.json();
+      applyPlayerUI(meStats);
+    }
+  } catch (e) {
+    // Sidebar is optional; fail silently
+  }
+}
+
+function scheduleSidebarRefresh() {
+  if (sidebarRefreshTimer) clearInterval(sidebarRefreshTimer);
+  sidebarRefreshTimer = setInterval(loadSidebarData, 30_000);
 }
 async function checkUser() {
   const res = await fetch("http://localhost:3000/auth/user", {
@@ -105,10 +304,20 @@ async function loadConfessions() {
   const res = await fetch("http://localhost:3000/confessions");
   const data = await res.json();
   confessionsById = Object.fromEntries(data.map((c) => [c._id, c]));
-  const filteredData =
-    selectedFeedFilter === "all"
-      ? data
-      : data.filter((c) => normalizeVibe(c.vibe) === selectedFeedFilter);
+
+  updateFeedTitle();
+
+  let filteredData = data;
+  if (selectedFeedFilter !== "all") {
+    filteredData = filteredData.filter(
+      (c) => normalizeVibe(c.vibe) === selectedFeedFilter,
+    );
+  }
+  if (selectedTagFilter) {
+    filteredData = filteredData.filter((c) =>
+      (c.tags || []).some((t) => normalizeTag(t) === selectedTagFilter),
+    );
+  }
 
   const container = document.getElementById("confessionContainer");
   container.innerHTML = "";
@@ -122,7 +331,12 @@ async function loadConfessions() {
     const tagsHTML =
       c.tags && c.tags.length
         ? `<div class="card-tags">
-            ${c.tags.map(tag => `<span class="tag">#${tag}</span>`).join("")}
+            ${c.tags
+              .map((tag) => {
+                const safe = normalizeTag(tag);
+                return `<span class="tag" data-tag="${encodeURIComponent(safe)}">#${escapeHtml(safe)}</span>`;
+              })
+              .join("")}
            </div>`
         : "";
 
@@ -289,6 +503,16 @@ async function loadMyPosts() {
 
     container.appendChild(div);
   });
+
+  if (container && !container.dataset.tagClickBound) {
+    container.dataset.tagClickBound = "1";
+    container.addEventListener("click", (e) => {
+      const el = e.target?.closest?.(".tag[data-tag]");
+      if (!el) return;
+      const tag = decodeURIComponent(el.getAttribute("data-tag") || "");
+      setTagFilter(tag === selectedTagFilter ? null : tag);
+    });
+  }
 }
 
 function showHistory() {
@@ -422,6 +646,7 @@ document.querySelectorAll(".filter-btn").forEach((btn) => {
       .forEach((b) => b.classList.remove("active"));
     this.classList.add("active");
     selectedFeedFilter = getFilterFromButtonText(this.textContent);
+    updateFeedTitle();
     loadConfessions();
   });
 });
@@ -754,5 +979,7 @@ document.getElementById("commentModal").addEventListener("click", function (e) {
 });
 (async () => {
   await checkUser();
+  await loadSidebarData();
+  scheduleSidebarRefresh();
   loadConfessions();
 })();

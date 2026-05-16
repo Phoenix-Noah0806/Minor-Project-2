@@ -745,6 +745,20 @@ body::after {
   box-shadow: 0 0 15px var(--pink-glow);
 }
 
+.topic-tag.active {
+  background: var(--green-subtle);
+  color: var(--green);
+  border-color: rgba(57, 255, 20, 0.35);
+  box-shadow: 0 0 12px var(--green-glow);
+}
+
+.trending-empty {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  padding: 0.25rem 0;
+}
+
 /* Mood */
 .mood-item {
   display: flex;

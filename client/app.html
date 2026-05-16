@@ -70,26 +70,9 @@
         <!-- Trending Section -->
         <div class="trending-section">
           <h3>🔥 Arena Buzz</h3>
-          <div class="trending-item">
-            <span class="trending-icon">🎭</span>
-            <div class="trending-content">
-              <span class="trending-title">Masked Confession</span>
-              <span class="trending-time">2m ago</span>
-            </div>
-          </div>
-          <div class="trending-item">
-            <span class="trending-icon">💀</span>
-            <div class="trending-content">
-              <span class="trending-title">Dark Secret</span>
-              <span class="trending-time">15m ago</span>
-            </div>
-          </div>
-          <div class="trending-item">
-            <span class="trending-icon">🃏</span>
-            <div class="trending-content">
-              <span class="trending-title">Plot Twist</span>
-              <span class="trending-time">1h ago</span>
-            </div>
+          <div id="trendingList"></div>
+          <div class="trending-empty" id="trendingEmpty" style="display: none">
+            No buzz yet. Drop the first message.
           </div>
         </div>
 
@@ -106,11 +89,7 @@
         <!-- Arena Tags -->
         <div class="topics-section">
           <h3>Arena Tags</h3>
-          <div class="topics-grid">
-            <span class="topic-tag">#masked_truth</span>
-            <span class="topic-tag">#campus_secrets</span>
-            <span class="topic-tag">#late_night_feels</span>
-          </div>
+          <div class="topics-grid" id="arenaTags"></div>
         </div>
 
         <!-- Arena Pulse -->
@@ -120,16 +99,16 @@
             <div class="mood-item">
               <span>Intense</span>
               <div class="mood-progress">
-                <div class="mood-fill stressed" style="width: 60%"></div>
+                <div class="mood-fill stressed" id="moodIntenseFill" style="width: 0%"></div>
               </div>
-              <span class="mood-percent">60%</span>
+              <span class="mood-percent" id="moodIntensePercent">0%</span>
             </div>
             <div class="mood-item">
               <span>Chill</span>
               <div class="mood-progress">
-                <div class="mood-fill happy" style="width: 25%"></div>
+                <div class="mood-fill happy" id="moodChillFill" style="width: 0%"></div>
               </div>
-              <span class="mood-percent">25%</span>
+              <span class="mood-percent" id="moodChillPercent">0%</span>
             </div>
           </div>
         </div>
@@ -159,18 +138,18 @@
         <div class="personal-header">
           <h3>Player Dashboard</h3>
           <div class="user-profile">
-            <span class="profile-id">Player #294</span>
-            <span class="profile-faculty">Unknown Division</span>
+            <span class="profile-id" id="playerNumber">Player</span>
+            <span class="profile-faculty" id="playerDivision">Unknown Division</span>
           </div>
         </div>
 
         <div class="stats-section">
           <div class="stat-item">
-            <span class="stat-number">0</span>
+            <span class="stat-number" id="statDrops">0</span>
             <span class="stat-label">Drops</span>
           </div>
           <div class="stat-item">
-            <span class="stat-number">0</span>
+            <span class="stat-number" id="statReactionsReceived">0</span>
             <span class="stat-label">Reactions</span>
           </div>
         </div>
@@ -179,23 +158,23 @@
           <h4>Arena Intel</h4>
           <div class="stat-row">
             <span>Peak Hours</span>
-            <span>8-10 PM</span>
+            <span id="intelPeakHours">—</span>
           </div>
           <div class="stat-row">
             <span>Arena Mood</span>
-            <span>🔥 Intense</span>
+            <span id="intelMood">—</span>
           </div>
           <div class="stat-row">
             <span>Total Messages</span>
-            <span>14,204</span>
+            <span id="intelTotalMessages">—</span>
           </div>
           <div class="stat-row">
             <span>Reactions Given</span>
-            <span>85.4k</span>
+            <span id="intelTotalReactions">—</span>
           </div>
           <div class="stat-row">
             <span>Arenas Online</span>
-            <span>12</span>
+            <span id="intelActiveUsers">—</span>
           </div>
         </div>
       </aside>
