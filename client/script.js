@@ -8,7 +8,7 @@ let currentDraftId = null;
 let drafts = [];
 let savedPostIds = [];
 let sidebarRefreshTimer = null;
-
+const API_BASE = "https://minor-project-2-spqb.onrender.com";
 function getDraftStorageKey() {
   return `cw_drafts_${currentUser?.id || "guest"}`;
 }
@@ -247,8 +247,8 @@ function applyIntelUI(globalStats) {
 async function loadSidebarData() {
   try {
     const [globalRes, meRes] = await Promise.all([
-      fetch("http://localhost:3000/stats/global"),
-      fetch("http://localhost:3000/stats/me", { credentials: "include" }),
+      fetch(`${API_BASE}/stats/global`),
+      fetch(`${API_BASE}/stats/me`, { credentials: "include" }),
     ]);
 
     const globalStats = await globalRes.json();
@@ -271,7 +271,7 @@ function scheduleSidebarRefresh() {
   sidebarRefreshTimer = setInterval(loadSidebarData, 30_000);
 }
 async function checkUser() {
-  const res = await fetch("http://localhost:3000/auth/user", {
+  const res = await fetch(`${API_BASE}/auth/user`, {
     credentials: "include",
   });
 
@@ -292,7 +292,7 @@ async function checkUser() {
 }
 
 async function logOut() {
-  await fetch("http://localhost:3000/auth/logout", {
+  await fetch(`${API_BASE}/auth/logout`, {
     credentials: "include",
   });
 
@@ -301,7 +301,7 @@ async function logOut() {
 
 // checkUser();
 async function loadConfessions() {
-  const res = await fetch("http://localhost:3000/confessions");
+  const res = await fetch(`${API_BASE}/confessions`);
   const data = await res.json();
   confessionsById = Object.fromEntries(data.map((c) => [c._id, c]));
 
@@ -422,7 +422,7 @@ async function postConfession() {
   if (!text || !vibe || !secretCode) {
     return alert("All fields are required");
   }
-  await fetch("http://localhost:3000/confessions", {
+  await fetch(`${API_BASE}/confessions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -475,7 +475,7 @@ function saveDraft() {
 }
 
 async function loadMyPosts() {
-  const res = await fetch("http://localhost:3000/confessions/my", {
+  const res = await fetch(`${API_BASE}/confessions/my`, {
     credentials: "include",
   });
 
@@ -570,7 +570,7 @@ async function saveEdit() {
   }
 
   const res = await fetch(
-    `http://localhost:3000/confessions/${currentEditId}`,
+    `${API_BASE}/confessions/${currentEditId}`,
     {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -617,7 +617,7 @@ async function confirmDelete() {
   }
 
   const res = await fetch(
-    `http://localhost:3000/confessions/${currentDeleteId}`,
+    `${API_BASE}/confessions/${currentDeleteId}`,
     {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -695,7 +695,7 @@ async function react(id, type) {
   const card = document.querySelector(`[data-confession-id="${id}"]`);
   if (!card) return;
 
-  const res = await fetch(`http://localhost:3000/confessions/${id}/react`, {
+  const res = await fetch(`${API_BASE}/confessions/${id}/react`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -776,7 +776,7 @@ async function submitComment() {
   if (!text) return;
 
   const res = await fetch(
-    `http://localhost:3000/confessions/${currentCommentConfessionId}/comment`,
+    `${API_BASE}/confessions/${currentCommentConfessionId}/comment`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
